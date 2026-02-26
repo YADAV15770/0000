@@ -1,4 +1,99 @@
-<!DOCTYPE html>
+{
+  "name": "2026 Days Tracker",
+  "short_name": "2026 Tracker",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f0f0f0",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192/e53935/ffffff?text=26",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/e53935/ffffff?text=26",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const MONTH_DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
+
+function getDayOfYear(date) {
+  const start = new Date(2026, 0, 1);
+  return Math.floor((date - start) / (1000 * 60 * 60 * 24)) + 1;
+}
+
+function getDayInfo(dayNum) {
+  let m = 0, d = dayNum;
+  for (let i = 0; i < 12; i++) {
+    if (d <= MONTH_DAYS[i]) { m = i; break; }
+    d -= MONTH_DAYS[i];
+  }
+  return { month: MONTHS[m], day: d, dayNum };
+}
+
+const today = new Date();
+const isYear2026 = today.getFullYear() === 2026;
+const currentDay = isYear2026 ? getDayOfYear(today) : 0;
+const totalDays = 365;
+const daysPast = Math.max(0, currentDay - 1);
+const pct = Math.round((daysPast / totalDays) * 100);
+
+// Stats update
+document.getElementById("past-count").textContent = daysPast;
+document.getElementById("pct-val").textContent = pct + "%";
+document.getElementById("left-count").textContent = totalDays - daysPast;
+document.getElementById("prog-bar").style.width = pct + "%";
+
+// Build months
+const container = document.getElementById("months-container");
+const tooltip = document.getElementById("tooltip-area");
+
+MONTHS.forEach((mon, mi) => {
+  const daysInMonth = MONTH_DAYS[mi];
+  const monthStartDay = MONTH_DAYS.slice(0, mi).reduce((a, b) => a + b, 0) + 1;
+
+  const block = document.createElement("div");
+  block.className = "month-block";
+
+  const label = document.createElement("div");
+  label.className = "month-name";
+  label.textContent = mon.toUpperCase();
+  block.appendChild(label);
+
+  const row = document.createElement("div");
+  row.className = "days-row";
+
+  for (let i = 0; i < daysInMonth; i++) {
+    const dayNum = monthStartDay + i;
+    const info = getDayInfo(dayNum);
+    const sq = document.createElement("div");
+    sq.className = "day-sq";
+    if (dayNum < currentDay) sq.classList.add("past");
+    else if (dayNum === currentDay) sq.classList.add("today");
+
+    sq.addEventListener("mouseenter", () => {
+      const isPast = dayNum < currentDay;
+      const isCurrent = dayNum === currentDay;
+      const color = isPast ? "#e53935" : isCurrent ? "#f57c00" : "#555";
+      const bg = isPast ? "#fff5f5" : isCurrent ? "#fff8f0" : "#f9f9f9";
+      const border = isPast ? "#ffcdd2" : isCurrent ? "#ffe0b2" : "#eee";
+      const msg = isPast ? " · Beet gaya ✓" : isCurrent ? " · Aaj 🔥" : " · Aane wala hai";
+      tooltip.innerHTML = `<span style="background:${bg};color:${color};border:1px solid ${border}">${info.day} ${info.month} 2026 — Day ${dayNum}${msg}</span>`;
+    });
+
+    sq.addEventListener("mouseleave", () => {
+      tooltip.innerHTML = "Kisi bhi square par hover karo";
+    });
+
+    row.appendChild(sq);
+  }
+
+  block.appendChild(row);
+  container.appendChild(block);
+});<!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8" />
